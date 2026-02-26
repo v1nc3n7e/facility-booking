@@ -1240,7 +1240,27 @@
         </div>
       </div>
     </div>
-
+    <div class="modal-overlay" id="modal-confirm">
+      <div class="modal" style="max-width: 380px">
+        <div class="modal-header">
+          <span class="modal-title" id="confirm-title">Confirm Action</span>
+          <button class="modal-close" onclick="closeModal('modal-confirm')">
+            ✕
+          </button>
+        </div>
+        <div class="modal-body">
+          <p id="confirm-message" style="font-size: 0.9rem; color: #444"></p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">
+            No, Keep It
+          </button>
+          <button class="btn btn-danger" id="confirm-ok-btn">
+            Yes, Cancel Booking
+          </button>
+        </div>
+      </div>
+    </div>
     <div id="toast-area"></div>
 
     <script>
@@ -1318,6 +1338,15 @@
       }
       function closeModal(id) {
         document.getElementById(id).classList.remove("open");
+      }
+      function customConfirm(message, onConfirm) {
+        document.getElementById("confirm-message").textContent = message;
+        const btn = document.getElementById("confirm-ok-btn");
+        btn.onclick = () => {
+          closeModal("modal-confirm");
+          onConfirm();
+        };
+        openModal("modal-confirm");
       }
       function badge(status) {
         return `<span class="badge badge-${status}">${status}</span>`;
@@ -1751,15 +1780,19 @@
       }
 
       async function cancelBooking(id) {
-        if (!confirm(`Cancel booking #${id}?`)) return;
-        const r = await api("DELETE", `/bookings/${id}`);
-        if (!r.success) {
-          toast(r.error, "error");
-          return;
-        }
-        toast(`Booking #${id} cancelled.`);
-        renderBookingsTable();
-        loadDashboard();
+        customConfirm(
+          `Are you sure you want to cancel booking #${id}? This cannot be undone.`,
+          async () => {
+            const r = await api("DELETE", `/bookings/${id}`);
+            if (!r.success) {
+              toast(r.error, "error");
+              return;
+            }
+            toast(`Booking #${id} cancelled.`);
+            renderBookingsTable();
+            loadDashboard();
+          },
+        );
       }
 
       async function openEditModal(id) {
