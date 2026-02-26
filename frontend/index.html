@@ -979,7 +979,12 @@
                 </div>
                 <div class="form-group">
                   <label class="form-label">Date</label>
-                  <input type="date" class="form-control" id="book-date" />
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="book-date"
+                    min=""
+                  />
                 </div>
                 <div class="form-row">
                   <div class="form-group">
@@ -1411,8 +1416,8 @@
           showErr("register-error", r.error || "Registration failed.");
           return;
         }
-        saveSession(r.token, r.user);
-        initApp();
+        showPage("auth-login");
+        toast("Account created! Please sign in.", "info");
       }
 
       // ── LOGOUT ───────────────────────────────────────
@@ -1655,8 +1660,8 @@
         fillTimeSelect("book-start", "09:00");
         fillTimeSelect("book-end", "10:00");
         document.getElementById("book-date").value = today;
+        document.getElementById("book-date").min = today;
       }
-
       async function submitBooking() {
         const fid = document.getElementById("book-facility").value;
         const date = document.getElementById("book-date").value;
