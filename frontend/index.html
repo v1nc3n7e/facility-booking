@@ -1268,313 +1268,313 @@
     <div id="toast-area"></div>
 
     <script>
-            const API = "https://bookspace-api-jgu5.onrender.com";
-            let currentUser = null;
-            let authToken = null;
-            const today = new Date().toISOString().split("T")[0];
-            const ICONS = ["🏢", "🔬", "🎓", "🌿", "🎙", "📐", "🖥", "🎭"];
-            const logLines = [];
+      const API = "https://bookspace-api-jgu5.onrender.com";
+      let currentUser = null;
+      let authToken = null;
+      const today = new Date().toISOString().split("T")[0];
+      const ICONS = ["🏢", "🔬", "🎓", "🌿", "🎙", "📐", "🖥", "🎭"];
+      const logLines = [];
 
-            // ── Session ──────────────────────────────────────
-            function saveSession(token, user) {
-              sessionStorage.setItem("bs_token", token);
-              sessionStorage.setItem("bs_user", JSON.stringify(user));
-              authToken = token;
-              currentUser = user;
-            }
-            function clearSession() {
-              sessionStorage.removeItem("bs_token");
-              sessionStorage.removeItem("bs_user");
-              authToken = null;
-              currentUser = null;
-            }
+      // ── Session ──────────────────────────────────────
+      function saveSession(token, user) {
+        sessionStorage.setItem("bs_token", token);
+        sessionStorage.setItem("bs_user", JSON.stringify(user));
+        authToken = token;
+        currentUser = user;
+      }
+      function clearSession() {
+        sessionStorage.removeItem("bs_token");
+        sessionStorage.removeItem("bs_user");
+        authToken = null;
+        currentUser = null;
+      }
 
-            // ── API ──────────────────────────────────────────
-            async function api(method, path, body = null) {
-              logAPI(method, path);
-              const opts = {
-                method,
-                headers: { "Content-Type": "application/json" },
-              };
-              if (authToken) opts.headers["Authorization"] = `Bearer ${authToken}`;
-              if (body) opts.body = JSON.stringify(body);
-              try {
-                const res = await fetch(API + path, opts);
-                const data = await res.json();
-                return { status: res.status, ...data };
-              } catch (e) {
-                return {
-                  status: 0,
-                  success: false,
-                  error: "Cannot connect to server.",
-                };
-              }
-            }
+      // ── API ──────────────────────────────────────────
+      async function api(method, path, body = null) {
+        logAPI(method, path);
+        const opts = {
+          method,
+          headers: { "Content-Type": "application/json" },
+        };
+        if (authToken) opts.headers["Authorization"] = `Bearer ${authToken}`;
+        if (body) opts.body = JSON.stringify(body);
+        try {
+          const res = await fetch(API + path, opts);
+          const data = await res.json();
+          return { status: res.status, ...data };
+        } catch (e) {
+          return {
+            status: 0,
+            success: false,
+            error: "Cannot connect to server.",
+          };
+        }
+      }
 
-            function logAPI(method, path) {
-              const ts = new Date().toLocaleTimeString();
-              const cls = {
-                GET: "method-GET",
-                POST: "method-POST",
-                PUT: "method-PUT",
-                DELETE: "method-DELETE",
-              };
-              logLines.unshift(
-                `<span class="${cls[method] || ""}">${method.padEnd(6)}</span> <span style="color:#e0d0b0">${path}</span> <span style="color:#666">— ${ts}</span>`,
-              );
-              if (logLines.length > 30) logLines.pop();
-              const el = document.getElementById("api-log-output");
-              if (el) el.innerHTML = logLines.join("\n");
-            }
+      function logAPI(method, path) {
+        const ts = new Date().toLocaleTimeString();
+        const cls = {
+          GET: "method-GET",
+          POST: "method-POST",
+          PUT: "method-PUT",
+          DELETE: "method-DELETE",
+        };
+        logLines.unshift(
+          `<span class="${cls[method] || ""}">${method.padEnd(6)}</span> <span style="color:#e0d0b0">${path}</span> <span style="color:#666">— ${ts}</span>`,
+        );
+        if (logLines.length > 30) logLines.pop();
+        const el = document.getElementById("api-log-output");
+        if (el) el.innerHTML = logLines.join("\n");
+      }
 
-            // ── Toast ────────────────────────────────────────
-            function toast(msg, type = "success") {
-              const el = document.createElement("div");
-              el.className = `toast ${type}`;
-              el.innerHTML = `<span>${{ success: "✓", error: "✕", info: "ℹ" }[type] || "•"}</span> ${msg}`;
-              document.getElementById("toast-area").appendChild(el);
-              setTimeout(() => el.remove(), 3500);
-            }
+      // ── Toast ────────────────────────────────────────
+      function toast(msg, type = "success") {
+        const el = document.createElement("div");
+        el.className = `toast ${type}`;
+        el.innerHTML = `<span>${{ success: "✓", error: "✕", info: "ℹ" }[type] || "•"}</span> ${msg}`;
+        document.getElementById("toast-area").appendChild(el);
+        setTimeout(() => el.remove(), 3500);
+      }
 
-            // ── Helpers ──────────────────────────────────────
-            function openModal(id) {
-              document.getElementById(id).classList.add("open");
-            }
-            function closeModal(id) {
-              document.getElementById(id).classList.remove("open");
-            }
-            function customConfirm(message, onConfirm) {
-              document.getElementById("confirm-message").textContent = message;
-              const btn = document.getElementById("confirm-ok-btn");
-              btn.onclick = () => {
-                closeModal("modal-confirm");
-                onConfirm();
-              };
-              openModal("modal-confirm");
-            }
-            function badge(status) {
-              return `<span class="badge badge-${status}">${status}</span>`;
-            }
+      // ── Helpers ──────────────────────────────────────
+      function openModal(id) {
+        document.getElementById(id).classList.add("open");
+      }
+      function closeModal(id) {
+        document.getElementById(id).classList.remove("open");
+      }
+      function customConfirm(message, onConfirm) {
+        document.getElementById("confirm-message").textContent = message;
+        const btn = document.getElementById("confirm-ok-btn");
+        btn.onclick = () => {
+          closeModal("modal-confirm");
+          onConfirm();
+        };
+        openModal("modal-confirm");
+      }
+      function badge(status) {
+        return `<span class="badge badge-${status}">${status}</span>`;
+      }
 
-            function timeSlots() {
-              const s = [];
-              for (let h = 8; h <= 22; h++)
-                for (let m = 0; m < 60; m += 30) {
-                  if (h === 22 && m > 0) continue;
-                  s.push(
-                    `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`,
-                  );
-                }
-              return s;
-            }
-            function fillTimeSelect(id, val = "") {
-              const sel = document.getElementById(id);
-              sel.innerHTML = timeSlots()
-                .map((t) => `<option${t === val ? " selected" : ""}>${t}</option>`)
-                .join("");
-            }
-            async function fillFacilitySelect(id) {
-              const r = await api("GET", "/facilities");
-              const sel = document.getElementById(id);
-              sel.innerHTML =
-                '<option value="">— Select —</option>' +
-                (r.data || [])
-                  .map((f) => `<option value="${f.id}">${f.name}</option>`)
-                  .join("");
-            }
+      function timeSlots() {
+        const s = [];
+        for (let h = 8; h <= 22; h++)
+          for (let m = 0; m < 60; m += 30) {
+            if (h === 22 && m > 0) continue;
+            s.push(
+              `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`,
+            );
+          }
+        return s;
+      }
+      function fillTimeSelect(id, val = "") {
+        const sel = document.getElementById(id);
+        sel.innerHTML = timeSlots()
+          .map((t) => `<option${t === val ? " selected" : ""}>${t}</option>`)
+          .join("");
+      }
+      async function fillFacilitySelect(id) {
+        const r = await api("GET", "/facilities");
+        const sel = document.getElementById(id);
+        sel.innerHTML =
+          '<option value="">— Select —</option>' +
+          (r.data || [])
+            .map((f) => `<option value="${f.id}">${f.name}</option>`)
+            .join("");
+      }
 
-            // ── Page switching ───────────────────────────────
-            function showPage(id) {
-              ["auth-login", "auth-register", "main-app"].forEach((p) => {
-                const el = document.getElementById(p);
-                if (p === "main-app") el.classList.remove("active");
-                else {
-                  el.classList.remove("active");
-                }
-              });
-              document.getElementById(id)?.classList.add("active");
-            }
+      // ── Page switching ───────────────────────────────
+      function showPage(id) {
+        ["auth-login", "auth-register", "main-app"].forEach((p) => {
+          const el = document.getElementById(p);
+          if (p === "main-app") el.classList.remove("active");
+          else {
+            el.classList.remove("active");
+          }
+        });
+        document.getElementById(id)?.classList.add("active");
+      }
 
-            // ── Auth errors ──────────────────────────────────
-            function showErr(id, msg) {
-              const e = document.getElementById(id);
-              e.textContent = msg;
-              e.classList.add("show");
-            }
-            function hideErr(id) {
-              document.getElementById(id).classList.remove("show");
-            }
+      // ── Auth errors ──────────────────────────────────
+      function showErr(id, msg) {
+        const e = document.getElementById(id);
+        e.textContent = msg;
+        e.classList.add("show");
+      }
+      function hideErr(id) {
+        document.getElementById(id).classList.remove("show");
+      }
 
-            // ── LOGIN ────────────────────────────────────────
-            async function submitLogin() {
-              hideErr("login-error");
-              const email = document.getElementById("login-email").value.trim();
-              const password = document.getElementById("login-password").value;
-              if (!email || !password) {
-                showErr("login-error", "Please enter email and password.");
-                return;
-              }
-              const r = await api("POST", "/auth/login", { email, password });
-              if (!r.success) {
-                showErr("login-error", r.error || "Login failed.");
-                return;
-              }
-              saveSession(r.token, r.user);
-              initApp();
-            }
+      // ── LOGIN ────────────────────────────────────────
+      async function submitLogin() {
+        hideErr("login-error");
+        const email = document.getElementById("login-email").value.trim();
+        const password = document.getElementById("login-password").value;
+        if (!email || !password) {
+          showErr("login-error", "Please enter email and password.");
+          return;
+        }
+        const r = await api("POST", "/auth/login", { email, password });
+        if (!r.success) {
+          showErr("login-error", r.error || "Login failed.");
+          return;
+        }
+        saveSession(r.token, r.user);
+        initApp();
+      }
 
-            // ── REGISTER ─────────────────────────────────────
-            async function submitRegister() {
-              hideErr("register-error");
-              const name = document.getElementById("reg-name").value.trim();
-              const email = document.getElementById("reg-email").value.trim();
-              const password = document.getElementById("reg-password").value;
-              const role = document.getElementById("reg-role").value;
-              if (!name || !email || !password) {
-                showErr("register-error", "All fields are required.");
-                return;
-              }
-              if (password.length < 6) {
-                showErr("register-error", "Password must be at least 6 characters.");
-                return;
-              }
-              const r = await api("POST", "/auth/register", {
-                name,
-                email,
-                password,
-                role,
-              });
-              if (!r.success) {
-                showErr("register-error", r.error || "Registration failed.");
-                return;
-              }
-              showPage("auth-login");
-              toast("Account created! Please sign in.", "info");
-            }
+      // ── REGISTER ─────────────────────────────────────
+      async function submitRegister() {
+        hideErr("register-error");
+        const name = document.getElementById("reg-name").value.trim();
+        const email = document.getElementById("reg-email").value.trim();
+        const password = document.getElementById("reg-password").value;
+        const role = document.getElementById("reg-role").value;
+        if (!name || !email || !password) {
+          showErr("register-error", "All fields are required.");
+          return;
+        }
+        if (password.length < 6) {
+          showErr("register-error", "Password must be at least 6 characters.");
+          return;
+        }
+        const r = await api("POST", "/auth/register", {
+          name,
+          email,
+          password,
+          role,
+        });
+        if (!r.success) {
+          showErr("register-error", r.error || "Registration failed.");
+          return;
+        }
+        showPage("auth-login");
+        toast("Account created! Please sign in.", "info");
+      }
 
-            // ── LOGOUT ───────────────────────────────────────
-            function logout() {
-              clearSession();
-              document.getElementById("main-app").classList.remove("active");
-              document.getElementById("auth-login").classList.add("active");
-              toast("Signed out successfully.", "info");
-            }
+      // ── LOGOUT ───────────────────────────────────────
+      function logout() {
+        clearSession();
+        document.getElementById("main-app").classList.remove("active");
+        document.getElementById("auth-login").classList.add("active");
+        toast("Signed out successfully.", "info");
+      }
 
-            // ── INIT APP ─────────────────────────────────────
-            function initApp() {
-              document.getElementById("auth-login").classList.remove("active");
-              document.getElementById("auth-register").classList.remove("active");
-              document.getElementById("main-app").classList.add("active");
+      // ── INIT APP ─────────────────────────────────────
+      function initApp() {
+        document.getElementById("auth-login").classList.remove("active");
+        document.getElementById("auth-register").classList.remove("active");
+        document.getElementById("main-app").classList.add("active");
 
-              document.getElementById("sidebar-name").textContent = currentUser.name;
-              document.getElementById("sidebar-avatar").textContent = currentUser.name
-                .charAt(0)
-                .toUpperCase();
-              document.getElementById("sidebar-role").innerHTML = badge(
-                currentUser.role,
-              );
+        document.getElementById("sidebar-name").textContent = currentUser.name;
+        document.getElementById("sidebar-avatar").textContent = currentUser.name
+          .charAt(0)
+          .toUpperCase();
+        document.getElementById("sidebar-role").innerHTML = badge(
+          currentUser.role,
+        );
 
-              if (currentUser.role === "admin") {
-                document.getElementById("admin-nav").style.display = "block";
-                document.getElementById("add-facility-btn").style.display =
-                  "inline-flex";
-              }
-              navigate("dashboard");
-            }
+        if (currentUser.role === "admin") {
+          document.getElementById("admin-nav").style.display = "block";
+          document.getElementById("add-facility-btn").style.display =
+            "inline-flex";
+        }
+        navigate("dashboard");
+      }
 
-            // ── NAVIGATE ─────────────────────────────────────
-            function navigate(page) {
-              document
-                .querySelectorAll(".page")
-                .forEach((p) => p.classList.remove("active"));
-              document
-                .querySelectorAll(".nav-item")
-                .forEach((n) => n.classList.remove("active"));
-              document.getElementById(`page-${page}`)?.classList.add("active");
-              document
-                .querySelector(`[onclick="navigate('${page}')"]`)
-                ?.classList.add("active");
-              const titles = {
-                dashboard: "Dashboard",
-                facilities: "Facilities",
-                availability: "Check Availability",
-                "new-booking": "New Booking",
-                bookings: "My Bookings",
-                "all-bookings": "All Bookings",
-              };
-              document.getElementById("topbar-title").textContent =
-                titles[page] || page;
-              if (page === "dashboard") loadDashboard();
-              if (page === "facilities") renderFacilities();
-              if (page === "availability") {
-                fillFacilitySelect("avail-facility-select");
-                document.getElementById("avail-date").min = today;
-              }
-              if (page === "new-booking") initNewBooking();
-              if (page === "bookings") renderBookingsTable();
-              if (page === "all-bookings") renderAllBookingsTable();
-            }
+      // ── NAVIGATE ─────────────────────────────────────
+      function navigate(page) {
+        document
+          .querySelectorAll(".page")
+          .forEach((p) => p.classList.remove("active"));
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((n) => n.classList.remove("active"));
+        document.getElementById(`page-${page}`)?.classList.add("active");
+        document
+          .querySelector(`[onclick="navigate('${page}')"]`)
+          ?.classList.add("active");
+        const titles = {
+          dashboard: "Dashboard",
+          facilities: "Facilities",
+          availability: "Check Availability",
+          "new-booking": "New Booking",
+          bookings: "My Bookings",
+          "all-bookings": "All Bookings",
+        };
+        document.getElementById("topbar-title").textContent =
+          titles[page] || page;
+        if (page === "dashboard") loadDashboard();
+        if (page === "facilities") renderFacilities();
+        if (page === "availability") {
+          fillFacilitySelect("avail-facility-select");
+          document.getElementById("avail-date").min = today;
+        }
+        if (page === "new-booking") initNewBooking();
+        if (page === "bookings") renderBookingsTable();
+        if (page === "all-bookings") renderAllBookingsTable();
+      }
 
-            // ── DASHBOARD ────────────────────────────────────
-            async function loadDashboard() {
-              const [fRes, bRes] = await Promise.all([
-                api("GET", "/facilities"),
-                api("GET", "/bookings"),
-              ]);
-              const facilities = fRes.data || [];
-              const allBookings = bRes.data || [];
-              const mine =
-                currentUser.role === "admin"
-                  ? allBookings
-                  : allBookings.filter((b) => b.user_id === currentUser.id);
-              const todayB = mine.filter(
-                (b) => b.date?.toString().slice(0, 10) === today,
-              );
+      // ── DASHBOARD ────────────────────────────────────
+      async function loadDashboard() {
+        const [fRes, bRes] = await Promise.all([
+          api("GET", "/facilities"),
+          api("GET", "/bookings"),
+        ]);
+        const facilities = fRes.data || [];
+        const allBookings = bRes.data || [];
+        const mine =
+          currentUser.role === "admin"
+            ? allBookings
+            : allBookings.filter((b) => b.user_id === currentUser.id);
+        const todayB = mine.filter(
+          (b) => b.date?.toString().slice(0, 10) === today,
+        );
 
-              document.getElementById("stats-row").innerHTML = `
+        document.getElementById("stats-row").innerHTML = `
           <div class="stat-card"><div class="stat-num">${facilities.length}</div><div class="stat-label">Facilities</div></div>
           <div class="stat-card"><div class="stat-num">${mine.length}</div><div class="stat-label">${currentUser.role === "admin" ? "Total" : "My"} Bookings</div></div>
           <div class="stat-card"><div class="stat-num">${mine.filter((b) => b.status === "confirmed").length}</div><div class="stat-label">Confirmed</div></div>
           <div class="stat-card"><div class="stat-num">${todayB.length}</div><div class="stat-label">Today</div></div>
         `;
-              document.getElementById("today-count").textContent = todayB.length;
+        document.getElementById("today-count").textContent = todayB.length;
 
-              const todayEl = document.getElementById("today-bookings-list");
-              todayEl.innerHTML = todayB.length
-                ? todayB
-                    .map(
-                      (b) => `
+        const todayEl = document.getElementById("today-bookings-list");
+        todayEl.innerHTML = todayB.length
+          ? todayB
+              .map(
+                (b) => `
           <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--cream)">
             <div>
               <div style="font-weight:500;font-size:.88rem">${b.facility_name}</div>
               <div style="font-size:.76rem;color:var(--grey)">${b.user_name} · ${String(b.start_time).slice(0, 5)}–${String(b.end_time).slice(0, 5)}</div>
             </div>${badge(b.status)}
           </div>`,
-                    )
-                    .join("")
-                : '<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">No bookings today</div></div>';
+              )
+              .join("")
+          : '<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">No bookings today</div></div>';
 
-              document.getElementById("facility-mini-list").innerHTML = facilities
-                .map(
-                  (f) => `
+        document.getElementById("facility-mini-list").innerHTML = facilities
+          .map(
+            (f) => `
           <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--cream)">
             <div><div style="font-weight:500;font-size:.88rem">${f.name}</div><div style="font-size:.75rem;color:var(--grey)">${f.location}</div></div>
             <span style="font-size:.75rem;color:var(--teal);font-family:var(--font-mono)">cap. ${f.capacity}</span>
           </div>`,
-                )
-                .join("");
-            }
+          )
+          .join("");
+      }
 
-            // ── FACILITIES ───────────────────────────────────
-            async function renderFacilities() {
-              const r = await api("GET", "/facilities");
-              const isAdmin = currentUser.role === "admin";
-              if (isAdmin)
-                document.getElementById("add-facility-btn").style.display =
-                  "inline-flex";
-              document.getElementById("facilities-grid").innerHTML = (r.data || [])
-                .map(
-                  (f, i) => `
+      // ── FACILITIES ───────────────────────────────────
+      async function renderFacilities() {
+        const r = await api("GET", "/facilities");
+        const isAdmin = currentUser.role === "admin";
+        if (isAdmin)
+          document.getElementById("add-facility-btn").style.display =
+            "inline-flex";
+        document.getElementById("facilities-grid").innerHTML = (r.data || [])
+          .map(
+            (f, i) => `
           <div class="facility-card">
             <div class="facility-thumb">${ICONS[i % ICONS.length]}</div>
             <div class="facility-info">
@@ -1587,79 +1587,79 @@
               </div>
             </div>
           </div>`,
-                )
-                .join("");
-            }
+          )
+          .join("");
+      }
 
-            async function goToAvailability(id) {
-              navigate("availability");
-              await fillFacilitySelect("avail-facility-select");
-              document.getElementById("avail-facility-select").value = id;
-              document.getElementById("avail-date").value = today;
-              checkAvailability();
-            }
+      async function goToAvailability(id) {
+        navigate("availability");
+        await fillFacilitySelect("avail-facility-select");
+        document.getElementById("avail-facility-select").value = id;
+        document.getElementById("avail-date").value = today;
+        checkAvailability();
+      }
 
-            function openAddFacilityModal() {
-              openModal("modal-add-facility");
-            }
+      function openAddFacilityModal() {
+        openModal("modal-add-facility");
+      }
 
-            async function submitAddFacility() {
-              const name = document.getElementById("new-fac-name").value.trim();
-              const location = document
-                .getElementById("new-fac-location")
-                .value.trim();
-              const capacity = document.getElementById("new-fac-capacity").value;
-              const desc = document.getElementById("new-fac-desc").value.trim();
-              if (!name || !location || !capacity) {
-                toast("Fill all required fields.", "error");
-                return;
-              }
-              const r = await api("POST", "/facilities", {
-                name,
-                location,
-                capacity: +capacity,
-                description: desc,
-              });
-              if (!r.success) {
-                toast(r.error, "error");
-                return;
-              }
-              toast(`Facility "${r.data.name}" added!`);
-              closeModal("modal-add-facility");
-              renderFacilities();
-            }
+      async function submitAddFacility() {
+        const name = document.getElementById("new-fac-name").value.trim();
+        const location = document
+          .getElementById("new-fac-location")
+          .value.trim();
+        const capacity = document.getElementById("new-fac-capacity").value;
+        const desc = document.getElementById("new-fac-desc").value.trim();
+        if (!name || !location || !capacity) {
+          toast("Fill all required fields.", "error");
+          return;
+        }
+        const r = await api("POST", "/facilities", {
+          name,
+          location,
+          capacity: +capacity,
+          description: desc,
+        });
+        if (!r.success) {
+          toast(r.error, "error");
+          return;
+        }
+        toast(`Facility "${r.data.name}" added!`);
+        closeModal("modal-add-facility");
+        renderFacilities();
+      }
 
-            async function deleteFacility(id, name) {
-              if (!confirm(`Delete "${name}"?`)) return;
-              const r = await api("DELETE", `/facilities/${id}`);
-              if (!r.success) {
-                toast(r.error, "error");
-                return;
-              }
-              toast(`"${name}" deleted.`);
-              renderFacilities();
-            }
+      async function deleteFacility(id, name) {
+        if (!confirm(`Delete "${name}"?`)) return;
+        const r = await api("DELETE", `/facilities/${id}`);
+        if (!r.success) {
+          toast(r.error, "error");
+          return;
+        }
+        toast(`"${name}" deleted.`);
+        renderFacilities();
+      }
 
-            // ── AVAILABILITY ─────────────────────────────────
-            async function checkAvailability() {
-              const fid = document.getElementById("avail-facility-select").value;
-              const date = document.getElementById("avail-date").value;
-              if (!fid || !date) {
-                toast("Select a facility and date.", "error");
-                return;
-              }
-              const r = await api(
-                "GET",
-                `/availability?facility_id=${fid}&date=${date}`,
-              );
-              if (!r.success) {
-                toast(r.error, "error");
-                return;
-              }
-              const d = r.data || r;
-              const { facility, available_slots, booked_slots, slots } = d;
-              const pct = Math.round((available_slots / slots.length) * 100);
-              document.getElementById("availability-result").innerHTML = `
+      // ── AVAILABILITY ─────────────────────────────────
+      async function checkAvailability() {
+        const fid = document.getElementById("avail-facility-select").value;
+        const date = document.getElementById("avail-date").value;
+        if (!fid || !date) {
+          toast("Select a facility and date.", "error");
+          return;
+        }
+        const r = await api(
+          "GET",
+          `/availability?facility_id=${fid}&date=${date}`,
+        );
+        if (!r.success) {
+          toast(r.error, "error");
+          return;
+        }
+        const d = r.data || r;
+        const { facility, available_slots, booked_slots, slots } = d;
+        const pct = Math.round((available_slots / slots.length) * 100);
+        document.getElementById("availability-result").innerHTML = `
           <div class="card">
             <div class="card-header"><span class="card-title">${facility.name}</span><span style="font-size:.8rem;color:var(--grey);font-family:var(--font-mono)">${date}</span></div>
             <div class="card-body">
@@ -1674,75 +1674,77 @@
               </div>
             </div>
           </div>`;
-            }
-
-            async function prefillBooking(fid, date, start, end) {
-              navigate("new-booking");
-              await initNewBooking();
-              document.getElementById("book-facility").value = fid;
-              document.getElementById("book-date").value = date;
-              document.getElementById("book-start").value = start;
-              document.getElementById("book-end").value = end;
-              toast("Slot pre-filled! Complete your booking below.", "info");
-            }
-
-            // ── NEW BOOKING ──────────────────────────────────
-           async function initNewBooking(){
-        await fillFacilitySelect('book-facility');
-        fillTimeSelect('book-start','09:00');
-        fillTimeSelect('book-end','09:30');
-        document.getElementById('book-date').value=today;
-        document.getElementById('book-date').min=today;
-        document.getElementById('book-end').value='09:30';
-        document.getElementById('book-start').addEventListener('change', function(){
-          const start=this.value;
-          const[h,m]=start.split(':').map(Number);
-          const end=new Date(0,0,0,h,m+30);
-          const endStr=`${String(end.getHours()).padStart(2,'0')}:${String(end.getMinutes()).padStart(2,'0')}`;
-          document.getElementById('book-end').value=endStr;
-        });
       }
-            }
-            async function submitBooking() {
-              const fid = document.getElementById("book-facility").value;
-              const date = document.getElementById("book-date").value;
-              const start = document.getElementById("book-start").value;
-              const end = document.getElementById("book-end").value;
-              const notes = document.getElementById("book-notes").value;
-              if (!fid || !date || !start || !end) {
-                toast("Complete all required fields.", "error");
-                return;
-              }
-              const r = await api("POST", "/bookings", {
-                facility_id: +fid,
-                user_id: currentUser.id,
-                date,
-                start_time: start,
-                end_time: end,
-                notes,
-              });
-              if (!r.success) {
-                toast(r.error, "error");
-                return;
-              }
-              toast(`Booking #${r.data.id} created!`);
-              navigate("bookings");
-            }
 
-            // ── MY BOOKINGS ──────────────────────────────────
-            async function renderBookingsTable() {
-              const s = document.getElementById("filter-status").value;
-              const d = document.getElementById("filter-date").value;
-              let qs = `?user_id=${currentUser.id}`;
-              if (s) qs += `&status=${s}`;
-              if (d) qs += `&date=${d}`;
-              const r = await api("GET", `/bookings${qs}`);
-              const data = r.data || [];
-              const tbody = document.getElementById("bookings-tbody");
-              tbody.innerHTML = data.length
-                ? data
-                    .map(
-                      (b) => `
+      async function prefillBooking(fid, date, start, end) {
+        navigate("new-booking");
+        await initNewBooking();
+        document.getElementById("book-facility").value = fid;
+        document.getElementById("book-date").value = date;
+        document.getElementById("book-start").value = start;
+        document.getElementById("book-end").value = end;
+        toast("Slot pre-filled! Complete your booking below.", "info");
+      }
+
+      // ── NEW BOOKING ──────────────────────────────────
+      async function initNewBooking() {
+        await fillFacilitySelect("book-facility");
+        fillTimeSelect("book-start", "09:00");
+        fillTimeSelect("book-end", "09:30");
+        document.getElementById("book-date").value = today;
+        document.getElementById("book-date").min = today;
+        document.getElementById("book-end").value = "09:30";
+        document
+          .getElementById("book-start")
+          .addEventListener("change", function () {
+            const start = this.value;
+            const [h, m] = start.split(":").map(Number);
+            const end = new Date(0, 0, 0, h, m + 30);
+            const endStr = `${String(end.getHours()).padStart(2, "0")}:${String(end.getMinutes()).padStart(2, "0")}`;
+            document.getElementById("book-end").value = endStr;
+          });
+      }
+
+      async function submitBooking() {
+        const fid = document.getElementById("book-facility").value;
+        const date = document.getElementById("book-date").value;
+        const start = document.getElementById("book-start").value;
+        const end = document.getElementById("book-end").value;
+        const notes = document.getElementById("book-notes").value;
+        if (!fid || !date || !start || !end) {
+          toast("Complete all required fields.", "error");
+          return;
+        }
+        const r = await api("POST", "/bookings", {
+          facility_id: +fid,
+          user_id: currentUser.id,
+          date,
+          start_time: start,
+          end_time: end,
+          notes,
+        });
+        if (!r.success) {
+          toast(r.error, "error");
+          return;
+        }
+        toast(`Booking #${r.data.id} created!`);
+        navigate("bookings");
+      }
+
+      // ── MY BOOKINGS ──────────────────────────────────
+      async function renderBookingsTable() {
+        const s = document.getElementById("filter-status").value;
+        const d = document.getElementById("filter-date").value;
+        let qs = `?user_id=${currentUser.id}`;
+        if (s) qs += `&status=${s}`;
+        if (d) qs += `&date=${d}`;
+        const r = await api("GET", `/bookings${qs}`);
+        const data = r.data || [];
+        const tbody = document.getElementById("bookings-tbody");
+        tbody.innerHTML = data.length
+          ? data
+              .map(
+                (b) => `
           <tr>
             <td style="font-family:var(--font-mono);color:var(--grey)">#${b.id}</td>
             <td><div style="font-weight:500">${b.facility_name}</div><div style="font-size:.73rem;color:var(--grey)">${b.facility_location || ""}</div></td>
@@ -1755,25 +1757,25 @@
               ${b.status !== "cancelled" ? `<button class="btn btn-danger btn-sm" onclick="cancelBooking(${b.id})">Cancel</button>` : ""}
             </td>
           </tr>`,
-                    )
-                    .join("")
-                : `<tr><td colspan="7"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No bookings found</div></div></td></tr>`;
-            }
+              )
+              .join("")
+          : `<tr><td colspan="7"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No bookings found</div></div></td></tr>`;
+      }
 
-            // ── ALL BOOKINGS (Admin) ──────────────────────────
-            async function renderAllBookingsTable() {
-              const s = document.getElementById("admin-filter-status").value;
-              const d = document.getElementById("admin-filter-date").value;
-              let qs = "?";
-              if (s) qs += `&status=${s}`;
-              if (d) qs += `&date=${d}`;
-              const r = await api("GET", `/bookings${qs}`);
-              const data = r.data || [];
-              const tbody = document.getElementById("all-bookings-tbody");
-              tbody.innerHTML = data.length
-                ? data
-                    .map(
-                      (b) => `
+      // ── ALL BOOKINGS (Admin) ──────────────────────────
+      async function renderAllBookingsTable() {
+        const s = document.getElementById("admin-filter-status").value;
+        const d = document.getElementById("admin-filter-date").value;
+        let qs = "?";
+        if (s) qs += `&status=${s}`;
+        if (d) qs += `&date=${d}`;
+        const r = await api("GET", `/bookings${qs}`);
+        const data = r.data || [];
+        const tbody = document.getElementById("all-bookings-tbody");
+        tbody.innerHTML = data.length
+          ? data
+              .map(
+                (b) => `
           <tr>
             <td style="font-family:var(--font-mono);color:var(--grey)">#${b.id}</td>
             <td style="font-weight:500">${b.facility_name}</td>
@@ -1787,76 +1789,76 @@
               ${b.status !== "cancelled" ? `<button class="btn btn-danger btn-sm" onclick="cancelBooking(${b.id})">Cancel</button>` : ""}
             </td>
           </tr>`,
-                    )
-                    .join("")
-                : `<tr><td colspan="8"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No bookings found</div></div></td></tr>`;
-            }
+              )
+              .join("")
+          : `<tr><td colspan="8"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No bookings found</div></div></td></tr>`;
+      }
 
-            async function cancelBooking(id) {
-              customConfirm(
-                `Are you sure you want to cancel booking #${id}? This cannot be undone.`,
-                async () => {
-                  const r = await api("DELETE", `/bookings/${id}`);
-                  if (!r.success) {
-                    toast(r.error, "error");
-                    return;
-                  }
-                  toast(`Booking #${id} cancelled.`);
-                  renderBookingsTable();
-                  loadDashboard();
-                },
-              );
+      async function cancelBooking(id) {
+        customConfirm(
+          `Are you sure you want to cancel booking #${id}? This cannot be undone.`,
+          async () => {
+            const r = await api("DELETE", `/bookings/${id}`);
+            if (!r.success) {
+              toast(r.error, "error");
+              return;
             }
+            toast(`Booking #${id} cancelled.`);
+            renderBookingsTable();
+            loadDashboard();
+          },
+        );
+      }
 
-            async function openEditModal(id) {
-              const r = await api("GET", `/bookings/${id}`);
-              if (!r.success) {
-                toast(r.error, "error");
-                return;
-              }
-              const b = r.data;
-              document.getElementById("edit-booking-id").value = id;
-              document.getElementById("edit-booking-status").value = b.status;
-              document.getElementById("edit-notes").value = b.notes || "";
-              fillTimeSelect("edit-start", String(b.start_time).slice(0, 5));
-              fillTimeSelect("edit-end", String(b.end_time).slice(0, 5));
-              openModal("modal-edit-booking");
-            }
+      async function openEditModal(id) {
+        const r = await api("GET", `/bookings/${id}`);
+        if (!r.success) {
+          toast(r.error, "error");
+          return;
+        }
+        const b = r.data;
+        document.getElementById("edit-booking-id").value = id;
+        document.getElementById("edit-booking-status").value = b.status;
+        document.getElementById("edit-notes").value = b.notes || "";
+        fillTimeSelect("edit-start", String(b.start_time).slice(0, 5));
+        fillTimeSelect("edit-end", String(b.end_time).slice(0, 5));
+        openModal("modal-edit-booking");
+      }
 
-            async function saveEditBooking() {
-              const id = document.getElementById("edit-booking-id").value;
-              const status = document.getElementById("edit-booking-status").value;
-              const start = document.getElementById("edit-start").value;
-              const end = document.getElementById("edit-end").value;
-              const notes = document.getElementById("edit-notes").value;
-              const r = await api("PUT", `/bookings/${id}`, {
-                status,
-                start_time: start,
-                end_time: end,
-                notes,
-              });
-              if (!r.success) {
-                toast(r.error, "error");
-                return;
-              }
-              toast(`Booking #${id} updated!`);
-              closeModal("modal-edit-booking");
-              renderBookingsTable();
-              loadDashboard();
-            }
+      async function saveEditBooking() {
+        const id = document.getElementById("edit-booking-id").value;
+        const status = document.getElementById("edit-booking-status").value;
+        const start = document.getElementById("edit-start").value;
+        const end = document.getElementById("edit-end").value;
+        const notes = document.getElementById("edit-notes").value;
+        const r = await api("PUT", `/bookings/${id}`, {
+          status,
+          start_time: start,
+          end_time: end,
+          notes,
+        });
+        if (!r.success) {
+          toast(r.error, "error");
+          return;
+        }
+        toast(`Booking #${id} updated!`);
+        closeModal("modal-edit-booking");
+        renderBookingsTable();
+        loadDashboard();
+      }
 
-            // ── BOOT ─────────────────────────────────────────
-            document.addEventListener("DOMContentLoaded", () => {
-              const token = sessionStorage.getItem("bs_token");
-              const user = JSON.parse(sessionStorage.getItem("bs_user") || "null");
-              if (token && user) {
-                authToken = token;
-                currentUser = user;
-                initApp();
-              } else {
-                document.getElementById("auth-login").classList.add("active");
-              }
-            });
+      // ── BOOT ─────────────────────────────────────────
+      document.addEventListener("DOMContentLoaded", () => {
+        const token = sessionStorage.getItem("bs_token");
+        const user = JSON.parse(sessionStorage.getItem("bs_user") || "null");
+        if (token && user) {
+          authToken = token;
+          currentUser = user;
+          initApp();
+        } else {
+          document.getElementById("auth-login").classList.add("active");
+        }
+      });
     </script>
   </body>
 </html>
