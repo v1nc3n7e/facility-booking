@@ -8,9 +8,13 @@ function validateTimeRange(date, start_time, end_time) {
   if (!TIME_RE.test(start_time)) return "start_time must be HH:MM (24h).";
   if (!TIME_RE.test(end_time)) return "end_time must be HH:MM (24h).";
   if (start_time >= end_time) return "start_time must be before end_time.";
+  const validMinutes = ["00", "30"];
+  if (!validMinutes.includes(start_time.split(":")[1]))
+    return "start_time must be on a 30-minute interval (e.g. 09:00 or 09:30).";
+  if (!validMinutes.includes(end_time.split(":")[1]))
+    return "end_time must be on a 30-minute interval (e.g. 09:00 or 09:30).";
   return null;
 }
-
 async function hasConflict(
   facility_id,
   date,
@@ -106,13 +110,11 @@ exports.createBooking = async (req, res) => {
     const { facility_id, user_id, date, start_time, end_time, notes } =
       req.body;
     if (!facility_id || !user_id || !date || !start_time || !end_time) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error:
-            "facility_id, user_id, date, start_time, and end_time are required.",
-        });
+      return res.status(400).json({
+        success: false,
+        error:
+          "facility_id, user_id, date, start_time, and end_time are required.",
+      });
     }
     const timeErr = validateTimeRange(date, start_time, end_time);
     if (timeErr)
@@ -134,12 +136,10 @@ exports.createBooking = async (req, res) => {
     }
     const conflict = await hasConflict(facility_id, date, start_time, end_time);
     if (conflict) {
-      return res
-        .status(409)
-        .json({
-          success: false,
-          error: `Booking conflict with booking #${conflict.id}.`,
-        });
+      return res.status(409).json({
+        success: false,
+        error: `Booking conflict with booking #${conflict.id}.`,
+      });
     }
     const result = await db.query(
       `INSERT INTO bookings (facility_id, user_id, date, start_time, end_time, status, notes)
@@ -202,12 +202,10 @@ exports.updateBooking = async (req, res) => {
         id,
       );
       if (conflict)
-        return res
-          .status(409)
-          .json({
-            success: false,
-            error: `Booking conflict with booking #${conflict.id}.`,
-          });
+        return res.status(409).json({
+          success: false,
+          error: `Booking conflict with booking #${conflict.id}.`,
+        });
     }
     const result = await db.query(
       "UPDATE bookings SET date=$1, start_time=$2, end_time=$3, status=$4, notes=$5 WHERE id=$6 RETURNING *",
